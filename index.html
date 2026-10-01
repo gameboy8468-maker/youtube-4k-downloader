@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YouTube 4K Downloader</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: white;
+            text-align: center;
+            padding: 50px;
+        }
+
+        h1 {
+            font-size: 40px;
+        }
+
+        input {
+            width: 80%;
+            max-width: 600px;
+            padding: 15px;
+            border-radius: 10px;
+            border: none;
+            font-size: 16px;
+        }
+
+        button {
+            margin: 10px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #ff0033;
+            color: white;
+            font-weight: bold;
+        }
+
+        .quality {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🎬 YouTube 4K Downloader</h1>
+
+    <p>Download videos you own or have permission to download.</p>
+
+    <input
+        type="text"
+        placeholder="Paste YouTube URL here"
+        id="url"
+    >
+
+    <div class="quality">
+
+        <button onclick="selectQuality('360p')">
+            360p
+        </button>
+
+        <button onclick="selectQuality('720p')">
+            720p
+        </button>
+
+        <button onclick="selectQuality('1080p')">
+            1080p
+        </button>
+
+        <button onclick="selectQuality('1440p')">
+            1440p
+        </button>
+
+        <button onclick="selectQuality('4K')">
+            4K
+        </button>
+
+    </div>
+
+    <p id="selected">
+        Select a quality
+    </p>
+
+    <button onclick="downloadVideo()">
+        Download
+    </button>
+
+    <p id="message"></p>
+
+    <script>
+
+        let quality = "";
+
+        function selectQuality(q) {
+            quality = q;
+
+            document.getElementById("selected").innerText =
+                "Selected: " + q;
+        }
+
+        function downloadVideo() {
+
+            let url =
+                document.getElementById("url").value;
+
+            if (!url) {
+                document.getElementById("message").innerText =
+                    "Please paste a YouTube URL.";
+                return;
+            }
+
+            if (!quality) {
+                document.getElementById("message").innerText =
+                    "Please select a quality.";
+                return;
+            }
+
+            document.getElementById("message").innerText =
+                "Backend coming next...";
+        }
+
+    </script>
+
+</body>
+</html>
