@@ -1,126 +1,115 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-    <title>YouTube 4K Downloader</title>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #111;
-            color: white;
-            text-align: center;
-            padding: 50px;
-        }
-
-        h1 {
-            font-size: 40px;
-        }
-
-        input {
-            width: 80%;
-            max-width: 600px;
-            padding: 15px;
-            border-radius: 10px;
-            border: none;
-            font-size: 16px;
-        }
-
-        button {
-            margin: 10px;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            background: #ff0033;
-            color: white;
-            font-weight: bold;
-        }
-
-        .quality {
-            margin-top: 20px;
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ClipDropper</title>
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:#080b16;color:white;padding:30px}
+.wrap{max-width:800px;margin:auto;text-align:center}
+h1{font-size:55px}h1 span{color:#8f83ff}
+p{color:#aaa}
+.box{display:flex;gap:8px;background:#15192a;padding:10px;border-radius:15px}
+input{flex:1;padding:15px;background:none;border:0;color:white;font-size:16px}
+button{padding:14px 20px;border:0;border-radius:10px;background:#7568ff;color:white;font-weight:bold;cursor:pointer}
+.quality{margin:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.quality button{background:#20253a}
+.quality button.active{background:#7568ff}
+.download{width:100%;margin-top:15px}
+.result{margin:20px;padding:15px}
+</style>
 </head>
 
 <body>
+<div class="wrap">
 
-    <h1>🎬 YouTube 4K Downloader</h1>
+<h1>Download videos up to <span>4K.</span></h1>
 
-    <p>Download videos you own or have permission to download.</p>
+<p>Paste a YouTube video link, choose a quality, and download it.</p>
 
-    <input
-        type="text"
-        placeholder="Paste YouTube URL here"
-        id="url"
-    >
+<div class="box">
+<input id="url" placeholder="Paste YouTube URL here...">
+<button id="go">Check video</button>
+</div>
 
-    <div class="quality">
+<div class="quality">
+<button data-quality="360p">360p</button>
+<button data-quality="720p">720p</button>
+<button data-quality="1080p">1080p</button>
+<button data-quality="1440p">1440p</button>
+<button data-quality="4K">4K</button>
+</div>
 
-        <button onclick="selectQuality('360p')">
-            360p
-        </button>
+<button class="download" id="download">Download video</button>
 
-        <button onclick="selectQuality('720p')">
-            720p
-        </button>
+<div class="result" id="result"></div>
 
-        <button onclick="selectQuality('1080p')">
-            1080p
-        </button>
+<p>Use this service only for videos you own or have permission to download.</p>
 
-        <button onclick="selectQuality('1440p')">
-            1440p
-        </button>
+</div>
 
-        <button onclick="selectQuality('4K')">
-            4K
-        </button>
+<script>
+const BACKEND="https://clipdropper-backend.onrender.com";
+const input=document.getElementById("url");
+const result=document.getElementById("result");
+let quality="1080p";
 
-    </div>
+document.querySelectorAll("[data-quality]").forEach(button=>{
+button.onclick=()=>{
+quality=button.dataset.quality;
+document.querySelectorAll("[data-quality]").forEach(b=>b.classList.remove("active"));
+button.classList.add("active");
+result.textContent="Selected quality: "+quality;
+};
+});
 
-    <p id="selected">
-        Select a quality
-    </p>
+document.getElementById("go").onclick=()=>{
+if(!input.value.trim()){
+result.textContent="Please paste a YouTube URL.";
+return;
+}
+result.textContent="Video link detected. Quality: "+quality;
+};
 
-    <button onclick="downloadVideo()">
-        Download
-    </button>
+document.getElementById("download").onclick=async()=>{
+const url=input.value.trim();
 
-    <p id="message"></p>
+if(!url){
+result.textContent="Please paste a YouTube URL.";
+return;
+}
 
-    <script>
+result.textContent="Preparing download...";
 
-        let quality = "";
+try{
+const response=await fetch(BACKEND+"/api/download",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+url:url,
+quality:quality
+})
+});
 
-        function selectQuality(q) {
-            quality = q;
+if(!response.ok){
+const data=await response.json().catch(()=>({}));
+throw new Error(data.error||"Download failed.");
+}
 
-            document.getElementById("selected").innerText =
-                "Selected: " + q;
-        }
+const blob=await response.blob();
+const link=document.createElement("a");
+link.href=URL.createObjectURL(blob);
+link.download="clipdropper-video.mp4";
+document.body.appendChild(link);
+link.click();
+link.remove();
 
-        function downloadVideo() {
-
-            let url =
-                document.getElementById("url").value;
-
-            if (!url) {
-                document.getElementById("message").innerText =
-                    "Please paste a YouTube URL.";
-                return;
-            }
-
-            if (!quality) {
-                document.getElementById("message").innerText =
-                    "Please select a quality.";
-                return;
-            }
-
-            document.getElementById("message").innerText =
-                "Backend coming next...";
-        }
-
-    </script>
+result.textContent="Download started.";
+}catch(error){
+result.textContent="Download failed: "+error.message;
+}
+};
+</script>
 
 </body>
 </html>
