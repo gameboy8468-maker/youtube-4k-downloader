@@ -93,7 +93,7 @@ quality:quality
 
 if(!response.ok){
 const data=await response.json().catch(()=>({}));
-throw new Error(data.error||"Download failed.");
+throw new Error((data.error||"Download failed.")+(data.details?" — "+data.details:""));
 }
 
 const blob=await response.blob();
